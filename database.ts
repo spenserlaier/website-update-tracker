@@ -4,25 +4,32 @@ const db = new PouchDB("Websites");
 
 export async function getWebsite(url: string) {
     try {
-        const doc: Website = await db.get(url);
+        const doc: Website & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta =
+            await db.get(url);
         return doc;
     } catch (error: any) {
         console.log(
             `ERROR: DB Retrieval Failed for URL : ${url}\nError Contents: ${error}`,
         );
+        return undefined;
     }
 }
-export async function putWebsite(website: Website) {
+export async function putWebsite(newWebsite: Website) {
+    let oldWebsite = await getWebsite(newWebsite.url);
+    if (oldWebsite) {
+        oldWebsite = { ...oldWebsite, ...newWebsite };
+    }
+    const websiteToWrite = oldWebsite ? oldWebsite : newWebsite;
     try {
-        const response = await db.put(website);
+        const response = await db.put(websiteToWrite);
         if (!response.ok) {
             console.log(
-                `ERROR: DB Put Failed for website object: ${website}\n`,
+                `ERROR: DB Put Failed for website object: ${websiteToWrite}\n`,
             );
         }
     } catch (error: any) {
         console.log(
-            `ERROR: DB Put Failed for website object: ${website}\nError Contents: ${error} `,
+            `ERROR: DB Put Failed for website object: ${websiteToWrite}\nError Contents: ${error} `,
         );
     }
 }
