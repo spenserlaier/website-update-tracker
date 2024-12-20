@@ -16,16 +16,22 @@ export async function getWebsite(url: string) {
 }
 export async function putWebsite(newWebsite: Website) {
     let oldWebsite = await getWebsite(newWebsite.url);
-    if (oldWebsite) {
+    if (oldWebsite !== undefined) {
         oldWebsite = { ...oldWebsite, ...newWebsite };
+        console.log("updated the old website object with properties: ");
+        Object.keys(oldWebsite).forEach((key) =>
+            console.log(key, oldWebsite![key as keyof typeof oldWebsite]),
+        );
     }
-    const websiteToWrite = oldWebsite ? oldWebsite : newWebsite;
+    const websiteToWrite = oldWebsite !== undefined ? oldWebsite : newWebsite;
     try {
         const response = await db.put(websiteToWrite);
         if (!response.ok) {
             console.log(
-                `ERROR: DB Put Failed for website object: ${websiteToWrite}\n`,
+                `ERROR: DB Put Failed for website object (response not OK): ${websiteToWrite}\n`,
             );
+        } else {
+            console.log(`DB: Updated website document`);
         }
     } catch (error: any) {
         console.log(

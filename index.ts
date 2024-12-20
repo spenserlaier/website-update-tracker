@@ -29,7 +29,8 @@ class DefaultWebsite implements Website {
         this.url = url;
         const defaultXPath = new DefaultXPath();
         this.XPathQueries = [defaultXPath];
-        this.secondsBetweenChecks = SECONDS_PER_MINUTE * 3;
+        //this.secondsBetweenChecks = SECONDS_PER_MINUTE * 3;
+        this.secondsBetweenChecks = 15;
     }
 }
 
@@ -98,9 +99,9 @@ async function trackWebsite(website: Website, browser: Browser) {
 
 (async () => {
     console.log("starting program");
-    const exampleSite = new DefaultWebsite("www.example.com");
+    const exampleSite = new DefaultWebsite("https://example.com/");
     await putWebsite(exampleSite);
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({ headless: false });
     await trackWebsite(exampleSite, browser);
     console.log("thinking about it");
 })();
