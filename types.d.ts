@@ -1,11 +1,10 @@
 interface XPathQuery {
-    label: string | undefined;
+    label: string;
     contents: string;
     tags: string[];
     prevHash: string;
 }
 interface Website {
-    _id: string;
     url: string;
     XPathQueries: XPathQuery[];
     secondsBetweenChecks: number;

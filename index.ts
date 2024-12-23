@@ -8,7 +8,7 @@ const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
 const MILLISECONDS_PER_SECOND = 1000;
 
 class DefaultXPath implements XPathQuery {
-    label: string | undefined;
+    label: string;
     contents: string;
     tags: string[];
     prevHash: string;
@@ -79,7 +79,7 @@ function printEqualityMessage(msg: EqualityMessage) {
         );
     }
 }
-async function trackWebsite(website: Website, browser: Browser) {
+export async function trackWebsite(website: Website, browser: Browser) {
     const page = await browser.newPage();
     setInterval(async () => {
         const oldHashes = website.XPathQueries.map((q) => q.prevHash);
@@ -95,6 +95,14 @@ async function trackWebsite(website: Website, browser: Browser) {
         website.XPathQueries = updatedXPath;
         await putWebsite(website);
     }, website.secondsBetweenChecks * MILLISECONDS_PER_SECOND);
+}
+export async function runProgram() {
+    console.log("starting program");
+    const exampleSite = new DefaultWebsite("https://example.com/");
+    await putWebsite(exampleSite);
+    const browser = await chromium.launch({ headless: false });
+    await trackWebsite(exampleSite, browser);
+    console.log("thinking about it");
 }
 
 (async () => {
