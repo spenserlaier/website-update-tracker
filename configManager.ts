@@ -5,7 +5,7 @@ export function verifyArray(
     arr: Array<any>,
     validationFunction: (item: any) => boolean,
 ) {
-    return arr.map(validationFunction).includes(true);
+    return !arr.map(validationFunction).includes(false);
 }
 
 export function verifyXPathObject(obj: any): obj is XPathQuery {
