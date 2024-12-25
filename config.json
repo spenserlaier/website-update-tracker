@@ -1,1 +1,9 @@
-{"websites":["www.example.com"]}
+{"websites":[{
+    "url": "https://example.com",
+    "XPathQueries": [ {
+        "label": "page div tags",
+        "contents": "//div",
+        "tags": ["example"]
+    }],
+    "secondsBetweenChecks": 15
+}]}

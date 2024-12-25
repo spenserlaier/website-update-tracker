@@ -1,0 +1,4 @@
+- send website status updates e.g. via email
+- e2e test involving initializing database from scratch with new config and tracking, as well as 
+DB teardown
+

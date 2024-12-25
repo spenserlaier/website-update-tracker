@@ -1,11 +1,13 @@
 import { hash } from "crypto";
 import { Browser, chromium, devices, Page } from "playwright";
 import { getWebsite, putWebsite, putQuery } from "./database.js";
+import { parseConfig, synchronizeDB } from "./configManager.js";
 
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = SECONDS_PER_MINUTE * 60;
 const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
 const MILLISECONDS_PER_SECOND = 1000;
+const DEFAULT_CONFIG_PATH = "./config.json";
 
 class DefaultXPath implements XPathQuery {
     label: string;
@@ -70,8 +72,10 @@ function compareHashes(
 function printEqualityMessage(msg: EqualityMessage) {
     if (!msg.isFirstHash) {
         const equalityString = msg.areEqual ? "equal" : "not equal";
+        console.log("old hash: ", msg.oldHash);
+        console.log("new hash: ", msg.newHash);
         console.log(
-            `Comparing hashes for query "${msg.xpath.label} : Hashes are ${equalityString}"`,
+            `Comparing hashes for website "${msg.website.url}" and query "${msg.xpath.label}" : Hashes are ${equalityString}`,
         );
     } else {
         console.log(
@@ -98,18 +102,15 @@ export async function trackWebsite(website: Website, browser: Browser) {
 }
 export async function runProgram() {
     console.log("starting program");
-    const exampleSite = new DefaultWebsite("https://example.com/");
-    await putWebsite(exampleSite);
-    const browser = await chromium.launch({ headless: false });
-    await trackWebsite(exampleSite, browser);
-    console.log("thinking about it");
+    const config = await parseConfig(DEFAULT_CONFIG_PATH);
+    if (config) {
+        console.log("Config successfully parsed. Synchronizing database...");
+        await synchronizeDB(config);
+        const browser = await chromium.launch({ headless: false });
+        for (let website of config.websites) {
+            console.log("Initializing tracking for website: ", website.url);
+            trackWebsite(website, browser);
+        }
+    }
 }
-
-(async () => {
-    console.log("starting program");
-    const exampleSite = new DefaultWebsite("https://example.com/");
-    await putWebsite(exampleSite);
-    const browser = await chromium.launch({ headless: false });
-    await trackWebsite(exampleSite, browser);
-    console.log("thinking about it");
-})();
+runProgram();

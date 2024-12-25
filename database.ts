@@ -18,12 +18,16 @@ export async function putWebsite(newWebsite: Website) {
     let oldWebsite = await getWebsite(newWebsite.url);
     if (oldWebsite !== undefined) {
         oldWebsite = { ...oldWebsite, ...newWebsite };
-        console.log("updated the old website object with properties: ");
-        Object.keys(oldWebsite).forEach((key) =>
-            console.log(key, oldWebsite![key as keyof typeof oldWebsite]),
-        );
+        //console.log("updated the old website object with properties: ");
+        //Object.keys(oldWebsite).forEach((key) =>
+        //    console.log(key, oldWebsite![key as keyof typeof oldWebsite]),
+        //);
     }
-    const websiteToWrite = oldWebsite !== undefined ? oldWebsite : newWebsite;
+    const websiteToWrite =
+        oldWebsite !== undefined
+            ? oldWebsite
+            : { ...newWebsite, _id: newWebsite.url };
+    console.log("website to write: ", websiteToWrite);
     try {
         const response = await db.put(websiteToWrite);
         if (!response.ok) {
@@ -39,8 +43,6 @@ export async function putWebsite(newWebsite: Website) {
         );
     }
 }
-//TODO: need _rev field to be set when updating a document--revisions not automatic,
-//need to be explicit
 export async function putQuery(url: string, query: XPathQuery) {
     // append a query to a website if a query does not exist with the given label,
     // otherwise modify the given query
