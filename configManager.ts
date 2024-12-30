@@ -68,21 +68,11 @@ function XPathAreEqual(xpath1: XPathQuery, xpath2: XPathQuery) {
     return equalContents && equalLabels;
 }
 export async function synchronizeDB(configuration: Configuration) {
-    /*
-     *
-     * issue: when we synchronize the db, it looks like we're overwriting
-     * xpath queries with prior queries which have no prevHash,
-     * since prevHash is not specified in the config. this means that no matter what,
-     * when we start tracking a website again we end up with a not equals comparison
-     * solution: prioritize existing prevHashes from the database, since those will always be
-     * more recent
-     * */
     for (let website of configuration.websites) {
         let dbWebsite = await getWebsite(website.url);
         if (dbWebsite) {
-            //if two xpath in config and db are the same (i.e. same contents and label), then retrieve
-            //the hash from the database and prepare to write it back. otherwise, we'll write an empty string
-            //since the config file itself does not store hashes
+            //the config itself doesn't store prevHash values, so we need to look up those values and merge them
+            //with the provided website if they do not exist
             for (let dbXPath of dbWebsite.XPathQueries) {
                 let correspondingXPathIdx = website.XPathQueries.findIndex(
                     (q) => q.label === dbXPath.label,
@@ -101,8 +91,6 @@ export async function synchronizeDB(configuration: Configuration) {
         }
         const websiteToWrite =
             dbWebsite !== undefined ? { ...dbWebsite, website } : website;
-        //the config doesn't store prevHash values, so we need to look up those values and merge them
-        //with the provided website if they do not exist
         await putWebsite(websiteToWrite);
         //TODO: figure out how to handle websites that exist in the database but not the configuration file
     }
